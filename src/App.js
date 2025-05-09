@@ -160,10 +160,14 @@ export default function App() {
   /** Format popup */
   const [formatPopupOpened, setFormatPopupOpened] = React.useState(false);
   const [openedFormat, setOpenedFormat] = React.useState(null);
+    const urlParams = new URLSearchParams(window.location.search);
+    const glbUrl = urlParams.get('url')
 
+  const [file, setFile] = React.useState(glbUrl);
   /** Viewer */
-  const [file, setFile] = React.useState(window.location + "formats/FBX/models/box.fbx");
-
+  console.log(window.location)
+    // const [file, setFile] = React.useState("https://fibregridstorage.blr1.digitaloceanspaces.com/glb_models/20250505114909.glb");
+console.log(file)
   const onViewerReady = () => {
     setShowProgress(false)
   }
@@ -179,7 +183,8 @@ export default function App() {
   }
 
   /** left drawer */
-  const shouldOpenDrawer = () => window.innerWidth / window.innerHeight > 1;
+  // const shouldOpenDrawer = () => window.innerWidth / window.innerHeight > 1;
+    const shouldOpenDrawer = () => false;
   const [open, setOpen] = React.useState(shouldOpenDrawer());
   const autoOpenDrawer = () => { if (open) setOpen(shouldOpenDrawer()) };
 
@@ -243,10 +248,10 @@ export default function App() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap>
-            3D file Viewer
+           AMX 3D file Viewer
           </Typography>
           <div className={classes.grow} />
-          <div className={classes.sectionDesktop}>
+          {/* <div className={classes.sectionDesktop}>
             <Link href="https://github.com/rufus31415" color="inherit" target="_blank">
               <Button
                 color="inherit"
@@ -284,7 +289,7 @@ export default function App() {
             >
               <InfoIcon />
             </IconButton>
-          </div>
+          </div> */}
         </Toolbar>
       </AppBar>
       <Drawer
@@ -312,10 +317,10 @@ export default function App() {
             onClick={openTryPopup}
           >
             <ListItemIcon><OpenInBrowserIcon /></ListItemIcon>
-            <ListItemText primary="Try my files" />
+            <ListItemText primary="Upload OBJ files" />
           </ListItem>
         </List>
-        <Divider />
+        {/* <Divider />
         <List>
           {catalog.formats.map((format, index) => (
             <ListItem button
@@ -326,7 +331,7 @@ export default function App() {
               <ListItemText primary={format.name} />
             </ListItem>
           ))}
-        </List>
+        </List> */}
       </Drawer>
       <main className={classes.content}>
         <div className={classes.toolbar} />
