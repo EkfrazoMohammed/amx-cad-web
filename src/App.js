@@ -178,7 +178,7 @@ console.log(file)
   }
 
   const onViewerError = () => {
-    showSnackbar("error", "An error has occurred. If you are trying to load a model, could you please email it to me at rufus31415@gmail.com ?")
+    // showSnackbar("error", "An error has occurred. If you are trying to load a model, could you please email it to me at rufus31415@gmail.com ?")
     setShowProgress(false)
   }
 
@@ -211,7 +211,7 @@ console.log(file)
 
   return (
     <div className={classes.root}>
-      <HomePopup
+      {/* <HomePopup
         open={homePopupOpened}
         setOpen={sethomePopupOpened}
         onClose={onCloseHomePopup}
@@ -220,7 +220,7 @@ console.log(file)
         open={tryPopupOpened}
         setOpen={setTryPopupOpened}
         setFile={setFile}
-      />
+      /> */}
       <FormatPopup
         open={formatPopupOpened}
         setOpen={setFormatPopupOpened}
@@ -229,7 +229,7 @@ console.log(file)
       />
 
       <CssBaseline />
-      <AppBar
+      {/* <AppBar
         position="fixed"
         className={clsx(classes.appBar, {
           [classes.appBarShift]: open,
@@ -289,10 +289,11 @@ console.log(file)
             >
               <InfoIcon />
             </IconButton>
-          </div> */}
+          </div> 
         </Toolbar>
-      </AppBar>
-      <Drawer
+      </AppBar> */}
+      
+      {/*<Drawer
         variant="permanent"
         className={clsx(classes.drawer, {
           [classes.drawerOpen]: open,
@@ -320,7 +321,7 @@ console.log(file)
             <ListItemText primary="Upload OBJ files" />
           </ListItem>
         </List>
-        {/* <Divider />
+         <Divider />
         <List>
           {catalog.formats.map((format, index) => (
             <ListItem button
@@ -331,9 +332,10 @@ console.log(file)
               <ListItemText primary={format.name} />
             </ListItem>
           ))}
-        </List> */}
+        </List> 
       </Drawer>
-      <main className={classes.content}>
+      */}
+      {/* <main className={classes.content}>
         <div className={classes.toolbar} />
 
         <Paper elevation={3} className={classes.innerContent}>
@@ -348,7 +350,19 @@ console.log(file)
           />
         </Paper>
 
-      </main>
+      </main> */}
+
+         <Paper elevation={3} className={classes.innerContent}>
+          <Backdrop className={classes.backdrop} open={showProgress} >
+            <CircularProgress color="inherit" />
+          </Backdrop>
+          <Viewer
+            file={file}
+            onReady={onViewerReady}
+            onLoaded={onViewerLoaded}
+            onError={onViewerError}
+          />
+        </Paper>
     </div>
   );
 }
