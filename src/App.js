@@ -163,10 +163,10 @@ export default function App() {
     const urlParams = new URLSearchParams(window.location.search);
     const glbUrl = urlParams.get('url')
 
-  const [file, setFile] = React.useState(glbUrl);
+  // const [file, setFile] = React.useState(glbUrl);
   /** Viewer */
   console.log(window.location)
-    // const [file, setFile] = React.useState("https://fibregridstorage.blr1.digitaloceanspaces.com/glb_models/20250505114909.glb");
+    const [file, setFile] = React.useState("https://fibregridstorage.blr1.digitaloceanspaces.com/glb_models/20250505114909.glb");
 console.log(file)
   const onViewerReady = () => {
     setShowProgress(false)

@@ -1,32 +1,65 @@
 import React, { useEffect, useState } from 'react'
 import Unity, { UnityContent } from "react-unity-webgl";
 import { makeStyles } from '@material-ui/core/styles';
+import { Slider, Typography, Box } from '@material-ui/core';
 
+// Update UnityContent initialization with proper WebGL context
 const unityContent = new UnityContent(
-    "Build/build.json",
-    "Build/UnityLoader.js",
-    {
-        adjustOnWindowResize: true
+  "Build/build.json",
+  "Build/UnityLoader.js",
+  {
+    adjustOnWindowResize: true,
+    webglContextAttributes: {
+      alpha: false,  // THIS IS CRUCIAL - disables transparency
+      antialias: true,
+      preserveDrawingBuffer: false,
+      depth: true    // Ensure depth buffer is enabled
     }
+  }
 );
-
 const useStyles = makeStyles((theme) => ({
-    root: {
-        width: "100%",
-        height: "100%"
-    },
-    unityContent: {
-        background: "white", // Keep original background
-        width: "100%",
-        height: "100%",
-    },
-    paper: {
-        padding: theme.spacing(2),
-        textAlign: 'center',
-        color: theme.palette.text.secondary,
-    },
+  root: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+  },
+  viewerContainer: {
+    width: '80%',
+    height: '100%',
+  },
+  settingsContainer: {
+    width: '20%',
+    height: '100%',
+    background: '#f5f5f5',
+    borderLeft: `1px solid ${theme.palette.divider}`,
+    padding: theme.spacing(2),
+    overflowY: 'auto',
+    boxShadow: 'inset 2px 0 8px rgba(0,0,0,0.1)',
+  },
+  unityContent: {
+    background: 'white !important', // Force opaque background
+    width: '100%',
+    height: '100%',
+  },
+  controller: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing(2),
+  },
+  sliderSection: {
+    background: 'white',
+    padding: theme.spacing(1.5),
+    borderRadius: theme.shape.borderRadius,
+    boxShadow: theme.shadows[1],
+    marginBottom: theme.spacing(1),
+  },
+  title: {
+    fontWeight: 500,
+    color: theme.palette.primary.main,
+    marginBottom: theme.spacing(1),
+  },
 }));
-
 export default function Viewer(props) {
     console.log(props)
     const classes = useStyles();
@@ -38,6 +71,7 @@ const [settings, setSettings] = useState({
     saturation: 1.4,
     ambientIntensity: 2.0,
     directionalIntensity: 1.8,
+    opacity: 1.0, // Add opacity control
   });
     unityContent.on("Ready", () => {
         setReady(true)
@@ -69,6 +103,7 @@ const [settings, setSettings] = useState({
     }, [props.file]);
 
     useEffect(() => {
+    
         // Listen for window resize and notify Unity
         const handleResize = () => {
             if (ready) {
@@ -79,6 +114,7 @@ const [settings, setSettings] = useState({
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, [ready]);
+
 
     const loadFile = () => {
         try {
@@ -98,10 +134,10 @@ const [settings, setSettings] = useState({
                     file: props.file,
                     // Add config parameters that might help with lighting
                     config: {
-                        enhanceLighting: true,
-                        ambientIntensity: 1.5,
-                        directionalIntensity: 1.2
-                    }
+            enhanceLighting: true,
+            ambientIntensity: 2.0, // Increased for brighter ambient light
+            directionalIntensity: 1.8, // Increased for stronger directional light
+          },
                 }));
                 setFileName(props.file);
             }
@@ -118,25 +154,101 @@ const [settings, setSettings] = useState({
 
     // Add style overrides to improve lighting appearance
     useEffect(() => {
-        // Apply CSS filter to the Unity canvas to increase brightness
-        if (ready) {
-            const unityCanvas = document.querySelector('canvas');
-            if (unityCanvas) {
-                  unityCanvas.style.filter = `brightness(${settings.brightness}) contrast(${settings.contrast}) saturate(${settings.saturation})`;
-                // unityCanvas.style.filter = 'brightness(1.4) contrast(1.1)';
-            }
-        }
-    }, [ready]);
+    if (ready) {
+      const unityCanvas = document.querySelector('canvas');
+      if (unityCanvas) {
+         // Set canvas background to transparent
+            unityCanvas.style.backgroundColor = 'transparent';
+            // unityCanvas.style.background = 'white'; // Opaque background
+            // Apply all visual settings
+            unityCanvas.style.filter = `
+                brightness(${settings.brightness}) 
+                contrast(${settings.contrast}) 
+                saturate(${settings.saturation})
+                opacity(${settings.opacity})
+            `;
+        // unityCanvas.style.filter = `brightness(${settings.brightness}) contrast(${settings.contrast}) saturate(${settings.saturation})`;
+      }
+      // Update Unity lighting if file is loaded
+      if (fileName) {
+        unityContent.send('root', 'UpdateLighting', JSON.stringify({
+          config: {
+            enhanceLighting: true,
+            ambientIntensity: settings.ambientIntensity,
+            directionalIntensity: settings.directionalIntensity,
+          },
+        }));
+      }
+    }
+  }, [ready, settings, fileName]);
+  const handleSettingChange = (key, value) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+  };
 
     return (
-        <div className={classes.root}>
-            <Unity 
-                unityContent={unityContent} 
-                height="100%" 
-                width="100%" 
-                className={classes.unityContent}
-                style={{ filter: 'brightness(1.2)' }} // Add a brightness filter directly
-            />
-        </div>
+        <>
+           <div className={classes.root}>
+              <div className={classes.viewerContainer}>
+                <Unity
+                  unityContent={unityContent}
+                  height="100%"
+                  width="100%"
+                  className={classes.unityContent}
+                />
+              </div>
+              <Box className={classes.settingsContainer}>
+                <Box className={classes.controller}>
+                  <Typography variant="h6" className={classes.title}>
+                    Settings
+                  </Typography>
+                  <Box className={classes.sliderSection}>
+                    <Typography>Brightness</Typography>
+                    <Slider
+                      value={settings.brightness}
+                      min={0.5}
+                      max={3.0}
+                      step={0.1}
+                      onChange={(e, value) => handleSettingChange('brightness', value)}
+                      valueLabelDisplay="auto"
+                    />
+                  </Box>
+                  <Box className={classes.sliderSection}>
+                    <Typography>Contrast</Typography>
+                    <Slider
+                      value={settings.contrast}
+                      min={0.5}
+                      max={2.5}
+                      step={0.1}
+                      onChange={(e, value) => handleSettingChange('contrast', value)}
+                      valueLabelDisplay="auto"
+                    />
+                  </Box>
+                  <Box className={classes.sliderSection}>
+                    <Typography>Saturation</Typography>
+                    <Slider
+                      value={settings.saturation}
+                      min={0.5}
+                      max={2.0}
+                      step={0.1}
+                      onChange={(e, value) => handleSettingChange('saturation', value)}
+                      valueLabelDisplay="auto"
+                    />
+                  </Box>
+            
+            <Box className={classes.sliderSection}>
+                <Typography>Opacity</Typography>
+                <Slider
+                    value={settings.opacity}
+                    min={0.1}
+                    max={1.0}
+                    step={0.05}
+                    onChange={(e, value) => handleSettingChange('opacity', value)}
+                    valueLabelDisplay="auto"
+                />
+            </Box>
+                </Box>
+              </Box>
+            </div>
+            </>
     )
 }
